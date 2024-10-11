@@ -1,0 +1,115 @@
+// Create the database
+CREATE DATABASE ecommerce;
+
+
+// Use the database
+USE ecommerce;
+
+
+// Create customers table
+CREATE TABLE customers(id INT(30) NOT NULL auto_increment PRIMARY KEY,
+user_name VARCHAR(30) NOT NULL,
+email VARCHAR(50) NOT NULL,
+address VARCHAR(100)NOT NULL)ENGINE= InnoDB;
+
+
+// Create orders table
+CREATE TABLE orders(id INT(30) NOT NULL auto_increment PRIMARY KEY,
+customer_id INT,
+order_date DATE,
+total_amount INT,
+FOREIGN KEY(customer_id) REFERENCES customers(id))ENGINE= InnoDB;
+
+// Create products table
+CREATE TABLE products(id INT(20) NOT NULL auto_increment PRIMARY KEY,
+p_name VARCHAR(50)NOT NULL,
+price INT(30) NOT NULL,
+discription VARCHAR(100))ENGINE= InnoDB;
+
+// Insert data into customers table
+INSERT INTO customers(user_name,email,address) VALUES
+('Harish','harish21@gmail.com','12 Main st'),
+('Vicky','vicky12@gmail.com','24 Neru st'),
+('Anish','anish342@gmail.com','24 Ganthi st');
+
+SELECT * FROM customers;
+
+// Insert data into products table
+INSERT INTO products(p_name,price,discription) VALUES
+('Bat',2000,'This is wooden Bat. It is very strong'),
+('T-Shirt',1000,'This is cotton T-Shirt.'),
+('Shirt','1500','This is Trending Shirt');
+
+SELECT * FROM products;
+
+// Insert data into orders table
+INSERT INTO orders(customer_id, order_date, total_amount) VALUES
+(1,'2024-09-10',2000),
+(2,'2024-08-20',3000),
+(3,'2024-10-01',2500);
+
+SELECT * FROM orders;
+
+// Retrieve all customers who have placed an order in the last 30 days
+SELECT DISTINCT customers.* 
+FROM customers
+JOIN orders ON customers.id = orders.customer_id
+WHERE order_date >= CURDATE() - INTERVAL 30 DAY;
+
+// Get the total amount of all orders placed by each customer
+SELECT customers.user_name, SUM(orders.total_amount) AS total_spent
+FROM customers
+JOIN orders ON customers.id = orders.customer_id
+GROUP BY customers.id, customers.user_name;
+
+// Update the price of Product C
+UPDATE products SET price = 1650 WHERE id = 3;
+
+SELECT * FROM products;
+
+// Add a new column discount to the products table
+ALTER TABLE products
+ADD COLUMN discount INT(10) NOT NULL;
+
+SELECT * FROM products;
+
+// Retrieve the top 3 products with the highest price
+SELECT * FROM products ORDER BY price DESC LIMIT 3;
+
+// Get the names of customers who have ordered Product A
+SELECT DISTINCT customers.user_name
+FROM customers
+JOIN orders ON customers.id = orders.customer_id
+JOIN products ON orders.id = products.id
+WHERE products.id = 1;
+
+// Join the orders and customers tables to retrieve the customer's name and order date for each order
+SELECT customers.user_name, orders.order_date
+FROM customers
+JOIN orders ON customers.id = orders.customer_id;
+
+// Retrieve the orders with a total amount greater than 
+SELECT * FROM orders WHERE total_amount > 2000;
+
+
+// Create order_items table  
+CREATE TABLE order_items (
+    id INT(20) auto_increment PRIMARY KEY,
+    order_id INT(20) NOT NULL,
+    product_id INT(20) NOT NULL,
+    quantity INT(20) NOT NULL,
+    price INT(10) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+// Insert data into order_items table
+INSERT INTO order_items (order_id, product_id, quantity, price) VALUES 
+(1, 1, 2, 4000),
+(2, 2, 1, 2000),
+(2, 3, 2, 3300),
+(3, 1, 1, 2000),
+(3, 3, 1, 1650);
+
+// Retrieve the average total of all orders
+SELECT AVG(total_amount) AS avg_order_total FROM orders;
